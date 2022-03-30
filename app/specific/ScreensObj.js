@@ -175,14 +175,18 @@ var Base_Vod_obj = {
 
             this.itemsCount++;
             this.idObject[cell._id] = 1;
+            channel_name = this.use_helix ? cell.user_login : cell.channel.name;
+            user_id = this.use_helix ? cell.user_id : cell.channel._id;
+            username = this.use_helix ? cell.username : cell.channel.display_name;
+            started_at = this.use_helix ? cell.started_at : cell.created_at;
 
             this.row.appendChild(
                 Screens_createCellVod(
                     this.row_id + '_' + this.coloumn_id,
                     this.ids,
                     [thubnail.replace("{width}x{height}", Main_VideoSize),
-                    cell.channel.display_name,
-                    STR_STREAM_ON + Main_videoCreatedAt(cell.created_at),
+                    username,
+                    STR_STREAM_ON + Main_videoCreatedAt(started_at),
                     twemoji.parse(cell.title),
                     Main_addCommas(cell.views) + STR_VIEWS,
                     cell.resolutions.chunked ? Main_videoqualitylang(cell.resolutions.chunked.slice(-4), (parseInt(cell.fps.chunked) || 0), cell.channel.broadcaster_language) : '',
@@ -191,9 +195,9 @@ var Base_Vod_obj = {
                     cell._id,
                     cell.channel.broadcaster_language,
                     cell.game,
-                    cell.channel.name,
+                    channel_name,
                     cell.increment_view_count_url,
-                    cell.channel._id,
+                    user_id,
                     cell.channel.logo,
                     cell.channel.partner
                     ]));
@@ -547,7 +551,6 @@ var Base_Live_obj = {
             this.itemsCount++;
             this.idObject[id_cell] = 1;
             if (this.use_helix) {
-
                 this.row.appendChild(
                     Screens_createCellLive(
                         this.row_id + '_' + this.coloumn_id,
@@ -1159,14 +1162,15 @@ var Base_Channel_obj = {
         if (this.data.length >= this.MaxOffset || typeof this.MaxOffset === 'undefined') this.dataEnded = true;
     },
     empty_str: function() {
+        console.log("EMPTY")
         return STR_NO + STR_SPACE + STR_USER_CHANNEL;
     },
     addCellTemp: function(cell) {
+        // console.log(cell) // TODO this is logging the cell channels from search response
         if (!this.idObject[cell._id]) {
-
             this.itemsCount++;
             this.idObject[cell._id] = 1;
-
+            Main_values.Main_selectedChannelBroadcasterId = cell.id
             this.row.appendChild(
                 Screens_createCellChannel(
                     this.row_id + '_' + this.coloumn_id,
@@ -1230,16 +1234,16 @@ function ScreensObj_InitUserChannels() {
 
 function ScreensObj_InitSearchChannels() {
     SearchChannels = Screens_assign({
+        use_helix: true,
         HeaderQuatity: 2,
         ids: Screens_ScreenIds('SearchChannels'),
         table: 'stream_table_search_channel',
         screen: Main_SearchChannels,
-        object: 'channels',
-        base_url: Main_kraken_api + 'search/channels?limit=' + Main_ItemsLimitMax + '&query=',
+        object: 'data',
+        base_url: `${Main_helix_api}search/channels?first=${Main_ItemsLimitMax}&query=`,
         set_url: function() {
-            if (this.offset && (this.offset + Main_ItemsLimitMax) > this.MaxOffset) this.dataEnded = true;
-            this.url = this.base_url + encodeURIComponent(Main_values.Search_data) +
-                '&offset=' + this.offset;
+            if (this.use_helix === false && this.offset && (this.offset + Main_ItemsLimitMax) > this.MaxOffset) this.dataEnded = true;
+            this.url = this.base_url + encodeURIComponent(Main_values.Search_data) + (this.cursor ? '&after=' + this.cursor : '');
         },
         label_init: function() {
             Main_values.Search_isSearching = true;
@@ -1255,7 +1259,7 @@ function ScreensObj_InitSearchChannels() {
         },
         key_play: function() {
             if (Main_ThumbOpenIsNull(this.posY + '_' + this.posX, this.ids[0])) return;
-
+            console.log(Main_values)
             Main_values.Main_selectedChannel = JSON.parse(document.getElementById(this.ids[8] + this.posY + '_' + this.posX).getAttribute(Main_DataAttribute));
 
             Main_values.Main_selectedChannel_id = Main_values.Main_selectedChannel[1];
@@ -1274,9 +1278,8 @@ function ScreensObj_InitSearchChannels() {
         },
         addCell: function(cell) {
             this.addCellTemp(cell);
-        }
+        },
     }, Base_obj);
-
     SearchChannels = Screens_assign(SearchChannels, Base_Channel_obj);
     SearchChannels.addrow = Screens_addrowChannel;
     SearchChannels.visiblerows = 5;

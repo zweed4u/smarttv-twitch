@@ -88,11 +88,11 @@ function ChannelContent_loadDataPrepare() {
 }
 
 function ChannelContent_loadDataRequest() {
-    var theUrl = Main_kraken_api + 'streams/' +
-        encodeURIComponent(ChannelContent_TargetId !== undefined ? ChannelContent_TargetId : Main_values.Main_selectedChannel_id) +
-        Main_TwithcV5Flag_I;
+    console.log(inUseObj)
+    console.log(Main_values)
+    var theUrl = `${Main_helix_api}streams?user_name=${encodeURIComponent(ChannelContent_TargetId !== undefined ? ChannelContent_TargetId : Main_values.Main_selectedChannelDisplayname)}${(inUseObj.use_helix ? '' : Main_TwithcV5Flag)}`;
 
-    BasexmlHttpGet(theUrl, ChannelContent_loadingDataTimeout, 2, null, ChannelContent_loadDataRequestSuccess, ChannelContent_loadDataError);
+    BasexmlHttpGet(theUrl, ChannelContent_loadingDataTimeout, 2, null, ChannelContent_loadDataRequestSuccess, ChannelContent_loadDataError, null, null, inUseObj.use_helix);
 }
 
 function ChannelContent_loadDataRequestSuccess(response) {
@@ -165,9 +165,9 @@ function ChannelContent_CheckHost(responseObj, id) {
 }
 
 function ChannelContent_GetStreamerInfo() {
-    var theUrl = Main_kraken_api + 'channels/' + Main_values.Main_selectedChannel_id + Main_TwithcV5Flag_I;
+    var theUrl = `${Main_helix_api}channels?broadcaster_id=${Main_values.Main_selectedChannelBroadcasterId}${(inUseObj.use_helix ? '' : Main_TwithcV5Flag)}`;
 
-    BasexmlHttpGet(theUrl, PlayVod_loadingInfoDataTimeout, 2, null, ChannelContent_GetStreamerInfoSuccess, ChannelContent_GetStreamerInfoError);
+    BasexmlHttpGet(theUrl, PlayVod_loadingInfoDataTimeout, 2, null, ChannelContent_GetStreamerInfoSuccess, ChannelContent_GetStreamerInfoError, null, null, inUseObj.use_helix);
 }
 
 function ChannelContent_GetStreamerInfoSuccess(responseText) {

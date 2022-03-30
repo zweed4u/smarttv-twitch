@@ -148,7 +148,7 @@ function Screens_loadDataRequest() {
     inUseObj.set_url();
     if (inUseObj.use_hls)
         BasexmlHttpGetBack(inUseObj.url + Main_TwithcV5Flag, inUseObj.loadingDataTimeout, inUseObj.HeaderQuatity, inUseObj.token, Screens_concatenate, Screens_loadDataError);
-    else
+    else // TODO this is where the request is actually being sent off to the api
         BasexmlHttpGet(inUseObj.url + (inUseObj.use_helix ? '' : Main_TwithcV5Flag), inUseObj.loadingDataTimeout, inUseObj.HeaderQuatity, inUseObj.token, Screens_concatenate, Screens_loadDataError, null, null, inUseObj.use_helix);
 }
 
@@ -214,9 +214,8 @@ function Screens_loadDataSuccess() {
         var response_rows = Math.ceil(response_items / inUseObj.ColoumnsCount);
 
         var max_row = inUseObj.row_id + response_rows;
-
         for (inUseObj.row_id; inUseObj.row_id < max_row;) {
-
+    
             if (inUseObj.coloumn_id === inUseObj.ColoumnsCount) {
                 inUseObj.row = document.createElement('div');
                 if (inUseObj.rowClass) inUseObj.row.classList.add(inUseObj.rowClass);
